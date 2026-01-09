@@ -155,6 +155,34 @@ contract HelloWorld {
         return messages.length;
     }
 
+    /// @notice Get messages with pagination
+    /// @param page Page number (0-indexed)
+    /// @param pageSize Number of messages per page (max 50)
+    /// @return pageMessages Array of messages for the requested page
+    function getMessagesPaginated(uint256 page, uint256 pageSize) external view returns (string[] memory pageMessages) {
+        require(pageSize > 0 && pageSize <= 50, "Invalid page size");
+        uint256 startIndex = page * pageSize;
+        require(startIndex < messages.length, "Page out of bounds");
+
+        uint256 endIndex = startIndex + pageSize;
+        if (endIndex > messages.length) {
+            endIndex = messages.length;
+        }
+
+        pageMessages = new string[](endIndex - startIndex);
+        for (uint256 i = 0; i < pageMessages.length; i++) {
+            pageMessages[i] = messages[startIndex + i];
+        }
+    }
+
+    /// @notice Get total pages for pagination
+    /// @param pageSize Number of messages per page
+    /// @return totalPages Total number of pages
+    function getTotalPages(uint256 pageSize) external view returns (uint256 totalPages) {
+        require(pageSize > 0 && pageSize <= 50, "Invalid page size");
+        totalPages = (messages.length + pageSize - 1) / pageSize;
+    }
+
     /// @notice Search for messages containing a substring (case-sensitive)
     /// @param searchTerm The substring to search for
     /// @param maxResults Maximum number of results to return
